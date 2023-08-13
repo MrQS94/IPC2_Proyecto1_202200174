@@ -1,183 +1,270 @@
-from xml.dom import minidom
 from ListaSimple import ListaSimple
+from xml.dom import minidom
+from xml.etree import ElementTree as ET
 from xml.etree.ElementTree import Element, SubElement
-from xml.etree import ElementTree
+import time
+from os import system
 
 
 class Controlador():
     def __init__(self):
-        self.aux = None
-        self.matrix = ListaSimple()
-        self.repeated_times = []
+        self.xml= None
+        self.patron_sumas = ListaSimple()
+        self.nombre = ''
 
-    def subir_archivo(self, ruta):
-        try:
-            xml = minidom.parse(ruta)
-            self.aux = xml
-            print('El archivo ha sido cargado!!')
-        except ExceptionGroup:
+    # Procesa los grupos y los convierte en binarios, también se puede hacer con bool pero no es lo más optimo
+    def procesar_grupos(self, grupo):
+        temp_str = ''
+        datos_originales = ListaSimple()
+        actual = grupo.head
+        
+        while actual:
+            if actual.dato == 0:
+                temp_str += '0'
+            else:
+                temp_str += '1'
+            datos_originales.append(actual.dato)
+            actual = actual.siguiente
+        return temp_str, datos_originales
+
+    def cargar_archivo(self, ruta):
+        try:   
+            _xml_ = minidom.parse(ruta)
+            self.xml = _xml_   
+            print('El archivo ha sido cargado exitosamente.')
+        except FileNotFoundError:
             print('Error, el archivo no ha sido cargado.')
             
     def procesar_archivo(self):
-        nombres = self.aux.getElementsByTagName('senal')
-        count = 1
+        nombres = self.xml.getElementsByTagName('senal')
+        grupos = ListaSimple()
+        grupo_actual = ListaSimple()
+        grupo_contador = 1
         
+        # Se añaden los valores a una lista, y cuenta en la posición en donde se encuentra
+        # También analiza la amplitud, y lo compara para saber que amplitud se deben de crear
         for matriz in nombres:
-            fila = matriz.getAttribute('t')
-            columnas = matriz.getAttribute('A')
-            self.matrix.agregar_tiempo_amplitud(matriz.attributes['nombre'].value, fila, columnas)
-            filas = ListaSimple()
-            
-            for _ in range(int(fila)):
-                fila_t = ListaSimple()
-                filas.agregar_lista(fila_t)
+            columna = matriz.getAttribute('A')
             datos = matriz.getElementsByTagName('dato')
+            self.nombre = matriz.attributes['nombre'].value
             
             for dato in datos:
-                t = int(dato.attributes['t'].value)
-                valor = dato.firstChild.data
+                dato_str = dato.firstChild.data
+                dato_int = int(dato_str)
+                grupo_actual.append(dato_int)
+                if grupo_actual.size() == int(columna):
+                    grupos.append((grupo_actual, grupo_contador))
+                    grupo_actual = ListaSimple()
+                    grupo_contador += 1
                 
-                self.repeated_times.append(t)
-                filas.devolver_lista(t).agregar_nuevo_dato(valor)
-                if int(valor) == 0:
-                    filas.devolver_lista(t).frecuencia_binaria += '0'
-                else:
-                    filas.devolver_lista(t).frecuencia_binaria += '1'
-            self.matrix.devolver_lista(count).matriz = filas
-            count += 1
-            print('Matriz Cargado Exitosamente')
-            
-        for k in range(self.matrix.size):
-            print('\nCalculando matriz binaria: ', str(k + 1))
-            
-            repeats = ListaSimple()
-            repeats.empty_lista()
-            
-            reductions = ListaSimple()
-            reductions.empty_lista()
-            
-            for i in range(self.matrix.devolver_lista(k + 1).matriz.size):
-                repeat = ListaSimple()
-                repeat.empty_lista()
-            
-                nueva_fila = ListaSimple()
-                nueva_fila.empty_lista()
-                
-                for j in range(self.matrix.devolver_lista(k + 1).matriz.size):
-                    if (i + 1) != (j + 1):
-                        if self.matrix.devolver_lista(k + 1).matriz.devolver_lista(i + 1).frecuencia_binaria == self.matrix.devolver_lista(k + 1).matriz.devolver_lista(j + 1).frecuencia_binaria and self.matrix.devolver_lista(k + 1).matriz.devolver_lista(i + 1).flag == False and self.matrix.devolver_lista(k + 1).matriz.devolver_lista(j + 1).flag == False:
-                            if repeat.is_empty() is True:
-                                repeat.agregar_nuevo_dato(i + 1)
-                                repeat.agregar_nuevo_dato(j + 1)
-                                self.matrix.devolver_lista(k + 1).matriz.devolver_lista(j + 1).flag = True
-                                
-                                tiempo_i = self.repeated_times[i]
-                                tiempo_j = self.repeated_times[j]
-                                print('en i', tiempo_i, " en j", tiempo_j)
-                                
-                                for p in range(self.matrix.devolver_lista(k + 1).matriz.devolver_lista(i + 1).size):
-                                    valor = int(self.matrix.devolver_lista(k + 1).matriz.devolver_lista(i + 1).devolver_lista(p + 1).nombre) + int(self.matrix.devolver_lista(k + 1).matriz.devolver_lista(j + 1).devolver_lista(p + 1).nombre)
-                                    nueva_fila.agregar_nuevo_dato(valor)
-                            else:
-                                repeat.agregar_nuevo_dato(j + 1)
-                                self.matrix.devolver_lista(k + 1).matriz.devolver_lista(j + 1).flag = True
-                                for p in range(self.matrix.devolver_lista(k + 1).matriz.devolver_lista(i + 1).size):
-                                    nueva_fila.devolver_lista(p + 1).nombre += int(self.matrix.devolver_lista(k + 1).matriz.devolver_lista(j + 1).devolver_lista(p + 1).nombre)
-                                    
-                if repeat.is_empty() is False:
-                    repeats.agregar_lista(repeat)
-                    reductions.agregar_lista(nueva_fila)
-            
-            self.matrix.devolver_lista(k + 1).repeticiones = repeats
-            self.matrix.devolver_lista(k + 1).matriz_reducida = reductions
-            
-            
-            if repeats.is_empty() is False:
-                count = 0
-                for a in range(self.matrix.devolver_lista(k + 1).matriz.size):
-                    flag = False # Aquí debe ir el algoritmo
                     
-                    for t in range(repeats.size):
-                        for A in range(repeats.devolver_lista(t + 1).size):
-                            if a + 1 == repeats.devolver_lista(t + 1).devolver_lista(A + 1).nombre:
-                                flag = True
-                                
-                    if flag is False:
-                        nueva_fila = ListaSimple()
-                        nueva_fila.empty_lista()
-                        
-                        for u in range(self.matrix.devolver_lista(k + 1).matriz.devolver_lista(a + 1).size):
-                            nueva_fila.agregar_nuevo_dato(self.matrix.devolver_lista(k + 1).matriz.devolver_lista(a + 1).devolver_lista(u + 1).nombre)
-                        self.matrix.devolver_lista(k + 1).matriz_reducida.agregar_lista(nueva_fila)
-                        count += 1
-                        
-            for _ in range(count):
-                lista_reducida = ListaSimple()
-                lista_reducida.agregar_nuevo_dato(1)
-                self.matrix.devolver_lista(k + 1).repeticiones.agregar_lista(lista_reducida)
-                        
-            print('\nMatriz Reducida')
-            for n in range(self.matrix.devolver_lista(k + 1).matriz_reducida.size):
-                print('fila ', str(n + 1))
-                self.matrix.devolver_lista(k + 1).matriz_reducida.devolver_lista(n + 1).imprimir_nodos()
-                
-            print('\n Proceso terminado')
+        # Es el proceso de la matriz binaria, es muy importante saber que acá mismo, se convierten en binarios
+        # También se devuelven y hacen las sumas si hay un match, se sumaria el primero más el primero, y así ...
+        actual = grupos.head
+        
+        
+        while actual:
+            print('Calculando las matrices binarias...')
+            time.sleep(1)
+            patron, datos_originales = self.procesar_grupos(actual.dato[0])
+            suma_datos = ListaSimple() 
+            datos_actuales = datos_originales.head
+            while datos_actuales:
+                suma_datos.append(datos_actuales.dato)
+                datos_actuales = datos_actuales.siguiente
+            if self.patron_sumas.head is None:
+                self.patron_sumas.append((patron, suma_datos, [actual.dato[1]]))
+            else:
+                # Acá se relizan las sumas y se hace un append a self.patron_sumas
+                actual_patron_suma = self.patron_sumas.head
+                while actual_patron_suma:
+                    if actual_patron_suma.dato[0] == patron:
+                        actual_patron_suma.dato = (patron, actual_patron_suma.dato[1].suma(suma_datos), actual_patron_suma.dato[2] + [actual.dato[1]])
+                        break
+                    elif actual_patron_suma.siguiente is None:
+                        self.patron_sumas.append((patron, suma_datos, [actual.dato[1]]))
+                        break
+                    actual_patron_suma = actual_patron_suma.siguiente
+            actual = actual.siguiente
+        print('Realizando suma de tuplas...')
+        time.sleep(2)
+        print('Calculos de matrices y sumas, han sido completados.')
+        time.sleep(1)
     
-    def escribir_archivo_salida(self):
-        print('Cargando archivo XML...')
-        senales_reducidad = Element('senalesReducidas')
-        
-        for k in range(self.matrix.size):
-            fila = str(self.matrix.devolver_lista( k + 1).matriz_reducida.size + 1)
-            columna = str(self.matrix.devolver_lista(k + 1).columna)
+    def escribir_archivo_salida(self, ruta):
+        top = Element('senalesReducidas')
+        count_grupo = 0
+        A_count = 0
+        # Acá tenemos que self.patron_sumas, está en todo el Controlador, entonces solo necesitamos sacar
+        # cada uno de sus valores, que sería patrones, suma_datos, grupo_contador, con ello los agrupamos siguiendo
+        # la estructura que deseamos
+        child_senal = SubElement(top, 'senal', nombre = str(self.nombre), A = '4')
+        actual_patron_suma = self.patron_sumas.head
+        while actual_patron_suma:
+            _, suma_datos, grupo_contador = actual_patron_suma.dato
+            count_grupo += 1
+            child_grupo = SubElement(child_senal, 'grupo', g = str(count_grupo))
+            child_tiempos = SubElement(child_grupo, 'tiempos')
+            child_tiempos.text = str(grupo_contador)
+            child_datos_grupo = SubElement(child_grupo, 'datosGrupo')
+            A_count = 0
+            actual_suma_datos = suma_datos.head
             
-            name = str(self.matrix.devolver_lista(k + 1).nombre)
-            grupo = self.matrix.devolver_lista(k + 1).repeticiones.size
-            child_senal = SubElement(senales_reducidad, 'senal', nombre = str(name), A = str(fila))
-            for p in range(int(grupo)):
-                child_grupo = SubElement(child_senal, 'grupo', g = str(p + 1))
-                child_tiempos = SubElement(child_grupo, 'tiempos')
-                
-                tiempos = fila # Aquí añadir los grupos con los nombres creados
-                
-                child_tiempos.text = 'Hola ' + str(tiempos) 
-                child_gatos_grupo = SubElement(child_grupo, 'datosGrupo')
-                for i in range(self.matrix.devolver_lista(k + 1).matriz_reducida.size + 1):
-                    row = i + 1
-                    child_dato = SubElement(child_gatos_grupo, 'dato', A = str(row))
-                    child_dato.text = str(self.matrix.devolver_lista(k + 1).matriz_reducida.devolver_lista(p + 1).devolver_lista(i + 1).nombre)
-        
-        r_string = ElementTree.tostring(senales_reducidad, 'UTF-8')
+            while actual_suma_datos:
+                A_count += 1
+                child_dato = SubElement(child_datos_grupo, 'dato', A = str(A_count))
+                child_dato.text = str(actual_suma_datos.dato)
+                actual_suma_datos = actual_suma_datos.siguiente
+
+            actual_patron_suma = actual_patron_suma.siguiente
+            
+        r_string = ET.tostring(top, 'UTF-8')
         reparsed = minidom.parseString(r_string)
+        count_grupo = 0
         
-        file = open('salida.xml', 'w')
-        file.write(reparsed.toprettyxml(indent="  "))
-        file.close()
-    
-    def escribir_archivo_salida_2(self):
-        print('Cargando archivo XML...')
-        top = Element('senalesReucidas')
+        ruta_completa = ruta + 'salida.xml'
+        with open(ruta_completa, 'w', encoding='UTF-8') as archivo:
+            archivo.write(reparsed.toprettyxml(indent='  '))
+            archivo.close()
+            print('-'*100)
+            print('Se guardo el archivo satisfactoriamente en la siguiente ruta: ')
+            print('-'*100)
+            print(ruta_completa)
+            print('-'*100)
+            input('Presione cualquier tecla para continuar...')
         
-        for k in range(self.matrix.size):
-            fila = str(self.matrix.devolver_lista( k + 1).matriz_reducida.size)
-            columna = str(self.matrix.devolver_lista(k + 1).columna)
-            name = str(self.matrix.devolver_lista(k + 1).nombre + "_salida")
-            grupo = self.matrix.devolver_lista(k + 1).repeticiones.size
-            child_senal = SubElement(top, 'senal', nombre = str(name), A = str(fila))
+    def mostrar_datos_estudiante(self):
+        print('Andres Alejandro Quezada Cabrera')
+        print('202200174')
+        print('Introducción a la Programción y Computación 2 - Sección \"D\"')
+        print('Ingenieria en Ciencias y Sistemas')
+        print('4to. Semestre')
+
+    def graficar_reducida(self):
+        print()
+        print('Creando gráfica de matriz reducida...')
+        time.sleep(2)
+        nombres = self.xml.getElementsByTagName('senal')
+
+        for matriz in nombres:  
+            nombre = matriz.attributes['nombre'].value
+            columna = matriz.getAttribute('A')
+        
+            graph_head = '''
+            digraph L_reducida{
+            node[shape=box]
+
+            subgraph cluster_reducida{
+            raiz[label = "'''+ str(nombre) +'''"]
+            edge[dir = ""]
             
-            for i in range(self.matrix.devolver_lista(k + 1).matriz_reducida.size):
-                for j in range(int(self.matrix.devolver_lista(k + 1).columna)):
-                    row = i + 1
-                    column = j + 1
-                    child_dato = SubElement(child_senal, 'dato', A = str(row))
-                    child_dato.text = str(self.matrix.devolver_lista(k + 1).matriz_reducida.devolver_lista(i + 1).devolver_lista(j + 1).nombre)
+            Fila1[label="A = '''+ str(columna) +'''"];
+
+            raiz -> Fila1
             
-            for p in range(int(grupo)):
-                child_frecuencia = SubElement(child_senal, 'frecuencia', g = str(p + 1))
-                child_frecuencia.text = str(self.matrix.devolver_lista(k + 1).repeticiones.devolver_lista(p + 1).size)
+            '''
+            
+            graph_nodos = ""
+            graph_nodos_edges = ""
+            graph_edges = ""
+            graph_grupos = ""
+            count_grupo = 1
+            count_nodo = 0
+            actual_patron_suma = self.patron_sumas.head
+            
+            limite_patron_suma = self.patron_sumas_size()
+            while actual_patron_suma: 
+                _, suma_datos, grupo_contador = actual_patron_suma.dato
+                graph_grupos += f'NodoGrupos{count_grupo}[label="g={count_grupo}| t={str(grupo_contador)}"]\n'
+                if  count_grupo == 1:
+                    graph_edges += f'raiz -> NodoGrupos{count_grupo}\n'
+                elif count_grupo <= limite_patron_suma: 
+                    graph_edges += f'NodoGrupos{count_grupo - 1} -> NodoGrupos{count_grupo}\n'
+                actual_suma_datos = suma_datos.head
+                while actual_suma_datos:
+                    graph_nodos += f'Nodo{count_nodo}[label="{actual_suma_datos.dato}"];\n'
+                    if count_nodo < int(columna):
+                        graph_nodos_edges += f'raiz -> Nodo{count_nodo}\n'
+                    else:
+                        graph_nodos_edges += f'Nodo{count_nodo - int(columna)} -> Nodo{count_nodo}\n'
+                        
+                    count_nodo += 1
+                    actual_suma_datos = actual_suma_datos.siguiente
                 
-        file = open('salida.xml', 'w')
-        #file.write(str(self.prettify(top)))
-        file.close()
+                count_grupo += 1
+                actual_patron_suma = actual_patron_suma.siguiente
+        graph_footer = '''
+            }
+        }
+        '''        
+        graph = graph_head + graph_grupos + graph_nodos + graph_nodos_edges +  graph_edges + graph_footer
+        self.cargar_grafica(graph, str(nombre) + '_salida')
+
+    def patron_sumas_size(self):
+        actual_patron_suma = self.patron_sumas.head
+        count = 1
+        while actual_patron_suma:
+            count += 1
+            actual_patron_suma = actual_patron_suma.siguiente
+        return count
+
+    def graficar_original(self):
+        print()
+        print('Creando gráfica orignal...')
+        time.sleep(2)
+        nombres = self.xml.getElementsByTagName('senal')
+
+        for matriz in nombres:
+            nombre = matriz.attributes['nombre'].value
+            columna = matriz.getAttribute('A')
+            fila = matriz.getAttribute('t')
+            datos = matriz.getElementsByTagName('dato')
         
+            graph_head = '''
+            digraph L{
+            node[shape=box]
+
+            subgraph cluster{
+            raiz[label = "'''+ str(nombre) +'''"]
+            edge[dir = ""]
+
+            Fila1[label="t = '''+ str(columna) +'''"];
+            Fila2[label="A = '''+ str(fila) +'''"];
+
+            raiz -> Fila1
+            raiz -> Fila2 
+            '''
+
+            graph_nodos = ""
+            graph_edges = ""
+            count = 0
+            for dato in datos:
+                dato = dato.firstChild.data
+                graph_nodos += f'Nodo{count}[label="{(dato)}"];\n'
+                
+                if count < int(columna):
+                    graph_edges += f'raiz -> Nodo{count}\n'
+                else:
+                    graph_edges += f'Nodo{count - int(columna)} -> Nodo{count}\n'
+                count += 1
+            
         
+        graph_footer = '''
+            }
+        }
+        '''
+        
+        graph = graph_head + graph_nodos + graph_edges + graph_footer
+        self.cargar_grafica(graph, nombre)
+    
+    def cargar_grafica(self, graph, nombre):
+        nombre_sin_espacios = str(nombre).replace(' ', '')
+        with open(f'graphviz_{nombre_sin_espacios}.dot', 'w', encoding='UTF-/') as archivo:
+            archivo.write(graph)
+            archivo.close()
+
+        system(f'dot -Tpng graphviz_{nombre_sin_espacios}.dot -o graphviz_{nombre_sin_espacios}.png')
+        system(f'cd ./graphviz_{nombre_sin_espacios}.png')
+        
+    def reinciar(self):
+        self.xml = None

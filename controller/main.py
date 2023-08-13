@@ -2,7 +2,6 @@ from Controlador import Controlador
 
 controlador_handler = Controlador()
 
-ruta = "C:\\Users\\queza\\Documents\\Programacion\\Python\\USAC\\Lab IPC2\\Proyectos\\IPC2_Proyecto1_202200174\\src\\prueba 1.xml"
 def main():
 
     while True:
@@ -20,18 +19,22 @@ def main():
         print('-'*50)
         if opcion == '1':
             print('Opción Cargar Archivo: ')
-            #ruta = input('Ingrese la ruta del archivo: ')
-            controlador_handler.subir_archivo(ruta)
+            ruta = input('Ingrese la ruta del archivo: ')
+            controlador_handler.cargar_archivo(ruta)
         elif opcion == '2':
             controlador_handler.procesar_archivo()
         elif opcion == '3':
-            controlador_handler.escribir_archivo_salida()
+            ruta_salida = input('Escribir una ruta especifica: ')
+            controlador_handler.escribir_archivo_salida(ruta_salida)
         elif opcion == '4':
-            print()
+            controlador_handler.mostrar_datos_estudiante()
         elif opcion == '5':
-            print()
+            controlador_handler.graficar_original()
+            controlador_handler.graficar_reducida()
         elif opcion == '6':
-            print()
+            reincio = input('El sistema está apunto de reiniciarse, ¿desea continuar? (Y/N): ')
+            if reincio.lower() == 'y':
+                controlador_handler.reinciar()
         elif opcion == '7':
             print('Saliendo del programa...')
             break
@@ -39,4 +42,7 @@ def main():
             print('Error, opción incorrecta.')
 
 
-main()
+if __name__ == '__main__':
+    main()
+
+
