@@ -2,7 +2,6 @@ from Controlador import Controlador
 
 controlador_handler = Controlador()
 
-ruta = 'C:\\Users\\queza\\Documents\\Programacion\\Python\\USAC\\Lab IPC2\\Proyectos\\IPC2_Proyecto1_202200174\\src\\prueba 2.xml'
 
 def main():
 
@@ -21,7 +20,7 @@ def main():
         print('-'*50)
         if opcion == '1':
             print('Opción Cargar Archivo: ')
-            #ruta = input('Ingrese la ruta del archivo: ')
+            ruta = input('Ingrese la ruta del archivo: ')
             controlador_handler.cargar_archivo(ruta)
         elif opcion == '2':
             controlador_handler.procesar_archivo()

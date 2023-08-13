@@ -79,7 +79,7 @@ class Controlador():
                 
                 while actual:
                     print('Calculando las matrices binarias...')
-                    #time.sleep(1)
+                    time.sleep(1)
                     patron, datos_originales = self.procesar_grupos(actual.dato[0])
                     suma_datos = ListaSimple() 
                     datos_actuales = datos_originales.head
@@ -101,9 +101,9 @@ class Controlador():
                             actual_patron_suma = actual_patron_suma.siguiente
                     actual = actual.siguiente
                 print('Realizando suma de tuplas...')
-                #time.sleep(2)
+                time.sleep(2)
                 print('Calculos de matrices y sumas, han sido completadas.')
-                #time.sleep(1)
+                time.sleep(1)
     
     def escribir_archivo_salida(self, ruta):
         top = Element('senalesReducidas')
@@ -136,7 +136,7 @@ class Controlador():
         reparsed = minidom.parseString(r_string)
         count_grupo = 0
         
-        ruta_completa = ruta + 'salida.xml'
+        ruta_completa = ruta + self.nombre + '_salida.xml'
         with open(ruta_completa, 'w', encoding='UTF-8') as archivo:
             archivo.write(reparsed.toprettyxml(indent='  '))
             archivo.close()
@@ -280,4 +280,7 @@ class Controlador():
         system(f'cd ./graphviz_{nombre_sin_espacios}.png')
         
     def reinciar(self):
-        self.xml = None
+        self.xml= None
+        self.patron_sumas = ListaSimple()
+        self.nombre = ''
+        self.columna = 0
