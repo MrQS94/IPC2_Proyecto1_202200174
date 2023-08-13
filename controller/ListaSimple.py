@@ -1,41 +1,93 @@
-from Nodo import nodo
-
+from Dato import ListaMatrices
 
 class ListaSimple():
     def __init__(self):
+        self.frecuencia_binaria = ''
         self.head = None
-        self.head_binarios = None
+        self.flag = False
+        self.size = 0
         
-    def agregar_encabezado(self, dato, amplitud, tiempo):
-        nuevo_nodo = nodo(dato, amplitud, tiempo)
+    def agregar_nuevo_dato(self, dato):
+        nuevo_dato = ListaMatrices(dato)
         
         if self.head is None:
-            self.head = nuevo_nodo
+            self.head = nuevo_dato
+            self.head.siguiente = self.head
+            self.size += 1
         else:
-            actual = self.head
-            while actual.siguiente:
-                actual = actual.siguiente
-            
-            actual.siguiente = nuevo_nodo
-        
-    def agrupar_grupos(self, listas):
-        current = listas.head
-        binario_grupo = ''
-        count = 0
-        count_grupo = 0
-        
-        while current is not None:
-            binario_grupo += current.dato # Corregir que en vez que el dato se vuelva 0 o 1 que sea booleano, asi evitamos que se cambien los números
+            if self.head.siguiente == self.head:
+                self.head.siguiente = nuevo_dato
+                nuevo_dato.siguiente = self.head
+                self.size += 1
+            else:
+                temp = self.head
+                while temp.siguiente != self.head:
+                    temp = temp.siguiente
+                temp.siguiente = nuevo_dato
+                nuevo_dato.siguiente = self.head
+                self.size += 1                    
+                
+    def agregar_tiempo_amplitud(self, dato, tiempo, amplitud):
+        nuevo_TA = ListaMatrices(dato, tiempo, amplitud)
+        if self.head is None:
+            self.head = nuevo_TA
+            self.head.siguiente = self.head
+            self.size += 1
+        else:
+            if self.head.siguiente == self.head:
+                self.head.siguiente = nuevo_TA
+                nuevo_TA.siguiente = self.head
+                self.size += 1
+            else:
+                temp = self.head
+                while temp.siguiente != self.head:
+                    temp = temp.siguiente
+                temp.siguiente = nuevo_TA
+                nuevo_TA.siguiente = self.head
+                self.size += 1
+                
+    def agregar_lista(self, dato):
+        nueva_lista = dato
+        if self.head is None:
+            self.head = nueva_lista
+            self.head.siguiente = self.head
+            self.size += 1
+        else:
+            temp = self.head
+            while temp.siguiente != self.head:
+                temp = temp.siguiente
+            temp.siguiente = nueva_lista
+            nueva_lista.siguiente = self.head
+            self.size += 1
+                
+    def devolver_lista(self, indice):
+        temp = self.head
+        count = 1
+        while count < indice:
             count += 1
-            if count == 4:
-                count_grupo += 1
-                print(f'Grupo {count_grupo} binario: {binario_grupo}')
-                binario_grupo = ''
-                count = 0
-            current = current.siguiente
+            temp = temp.siguiente
+        return temp
+    
+    def eliminar_lista(self, i):
+        self.devolver_lista(i - 1).siguiente = self.devolver_lista(i + 1)
+        self.size -= 1
         
-    def imprimir(self):
-        actual = self.head
-        while actual:
-            print(f"Tiempo: {actual.tiempo} - Amplitud: {actual.amplitud} - Dato: {actual.dato}")
-            actual = actual.siguiente
+    def get_size(self):
+        return self.size
+    
+    def imprimir_nodos(self):
+        temp = self.head
+        size = 0
+        while size < self.size:
+            size += 1
+            print('-', temp.nombre)
+            temp = temp.siguiente
+            
+    def empty_lista(self):
+        self.head = None
+        
+    def is_empty(self):
+        if self.size == 0:
+            return True
+        else:
+            return False

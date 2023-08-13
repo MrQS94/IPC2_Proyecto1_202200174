@@ -1,6 +1,4 @@
 class nodo():
-    def __init__(self, dato, amplitud, tiempo):
+    def __init__(self, dato = None, siguiente = None):
         self.dato = dato
-        self.amplitud = amplitud
-        self.tiempo = tiempo
-        self.siguiente = None
+        self.siguiente = siguiente
