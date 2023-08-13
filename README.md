@@ -1,4 +1,4 @@
-# IPC2 - Proyecto 1 - 20220017
+# IPC2 - Proyecto 1 - 202200174
 Nombre Completo: Andres Alejandro Quezada Cabrera 
 
 Carné: 202200174
