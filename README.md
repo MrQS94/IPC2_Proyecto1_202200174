@@ -1,4 +1,4 @@
-# IPC2 - Proyecto 1 - 202200174
+# IPC2 - Proyecto 1 - 20220017
 Andres Alejandro Quezada Cabrera
 202200174
 Introducción a la Programción y Computación 2 - Sección "D"
