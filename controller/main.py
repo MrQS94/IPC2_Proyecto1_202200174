@@ -1,6 +1,6 @@
-from ListaSimple import ListaSimple
+from Controlador import Controlador
 
-lista_handler = ListaSimple()
+controlador_handler = Controlador()
 
 ruta = "C:\\Users\\queza\\Documents\\Programacion\\Python\\USAC\\Lab IPC2\\Proyectos\\IPC2_Proyecto1_202200174\\src\\prueba1.xml"
 def main():
@@ -20,12 +20,12 @@ def main():
         print('-'*50)
         if opcion == '1':
             print('Opción Cargar Archivo: ')
-            ruta = input('Ingrese la ruta del archivo: ')
-            lista_handler.leer_archivos(ruta)
+            #ruta = input('Ingrese la ruta del archivo: ')
+            controlador_handler.subir_archivo(ruta)
         elif opcion == '2':
-            print()
+            controlador_handler.procesar_archivo()
         elif opcion == '3':
-            print()
+            controlador_handler.escribir_archivo_salida()
         elif opcion == '4':
             print()
         elif opcion == '5':
