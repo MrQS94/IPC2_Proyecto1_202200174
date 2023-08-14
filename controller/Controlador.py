@@ -241,8 +241,8 @@ class Controlador():
             raiz[label = "'''+ str(nombre) +'''"]
             edge[dir = ""]
 
-            Fila1[label="t = '''+ str(columna) +'''"];
-            Fila2[label="A = '''+ str(fila) +'''"];
+            Fila1[label="t = '''+ str(fila) +'''"];
+            Fila2[label="A = '''+ str(columna) +'''"];
 
             raiz -> Fila1
             raiz -> Fila2 
