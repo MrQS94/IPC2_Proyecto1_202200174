@@ -34,7 +34,6 @@ class Controlador():
     def cargar_archivo(self, ruta):
         try:   
             self.xml = minidom.parse(ruta)
-            
             tree = ET.parse(ruta)
             root = tree.getroot()
             
@@ -55,7 +54,7 @@ class Controlador():
                     # Ordenar los datos según el orden deseado (t, A)
                     print(f'{t_valor}, {A_valor}')
                     datos_ordenados = sorted(datos, key=lambda dato: (dato.attrib["t"], dato.attrib["A"]))
-                    
+
                     # Reemplazar los datos en el XML con los datos ordenados
                     for i, dato in enumerate(datos_ordenados):
                         root.find("senal").remove(dato)

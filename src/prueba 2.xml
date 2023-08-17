@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version='1.0'?>
 <senales>
     <senal nombre="Prueba 2" t="5" A="5">
         <dato t="1" A="1">1</dato>
