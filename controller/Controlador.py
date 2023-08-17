@@ -28,14 +28,52 @@ class Controlador():
             actual = actual.siguiente
         return temp_str, datos_originales
 
+    # Implementar la comprobación de estructura del .xml, sino viene correcto, ordenarlo, y guardarlo, con la salida XXXXX_ordenado.xml
+    # Avisarle al usuario, que es un imbecil y que no sabe como ordenar los números
+    # Implementar .xml multilinea
     def cargar_archivo(self, ruta):
         try:   
-            _xml_ = minidom.parse(ruta)
-            self.xml = _xml_   
+            self.xml = minidom.parse(ruta)
+            
+            tree = ET.parse(ruta)
+            root = tree.getroot()
             
             nombres = self.xml.getElementsByTagName('senal')
+            datos = root.find("senal").findall("dato")
+            t_esperado = "1"
+            A_esperado = "1"
+            
             for matriz in nombres:
-                nombre = matriz.attributes['nombre'].value
+                columna = int(matriz.getAttribute('A'))
+                fila = int(matriz.getAttribute('t'))
+            
+            for i, dato in enumerate(datos):
+                t_valor = dato.attrib["t"]
+                A_valor = dato.attrib["A"]
+                
+                if (t_valor, A_valor) != (t_esperado, A_esperado):
+                    # Ordenar los datos según el orden deseado (t, A)
+                    print(f'{t_valor}, {A_valor}')
+                    datos_ordenados = sorted(datos, key=lambda dato: (dato.attrib["t"], dato.attrib["A"]))
+                    
+                    # Reemplazar los datos en el XML con los datos ordenados
+                    for i, dato in enumerate(datos_ordenados):
+                        root.find("senal").remove(dato)
+                        root.find("senal").insert(i, dato)
+
+                    # Guardar el archivo XML actualizado
+                    tree.write(ruta, xml_declaration=True, encoding='UTF-8')
+                    self.xml = minidom.parse(ruta)
+                    print('El archivo no llevaba el orden correcto, se acaba de ordenar de la manera correcta.')
+                    print('Revise nuevamente el archivo .xml.')
+                    return
+                # Actualizar los valores esperados para la siguiente iteración
+                A_esperado = str((int(A_esperado) % columna) + 1)
+                if A_esperado == "1":
+                    t_esperado = str((int(t_esperado) % fila) + 1)
+            
+            for root in nombres:
+                nombre = root.attributes['nombre'].value
                 if self.nombre == nombre:
                     print('El archivo tiene el mismo nombre que el anterior.')
                     print('Se van a reemplazar los datos antiguos con los nuevos.')
