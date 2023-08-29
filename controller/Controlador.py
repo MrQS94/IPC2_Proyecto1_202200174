@@ -4,7 +4,7 @@ from xml.etree import ElementTree as ET
 from xml.etree.ElementTree import Element, SubElement
 import time
 from os import system
-
+import os
 
 class Controlador():
     def __init__(self):
@@ -25,7 +25,7 @@ class Controlador():
             else:
                 temp_str += '1'
             datos_originales.append(actual.dato)
-            actual = actual.siguiente
+            actual = actual.next
         return temp_str, datos_originales
 
     # Implementar la comprobación de estructura del .xml, sino viene correcto, ordenarlo, y guardarlo, con la salida XXXXX_ordenado.xml
@@ -33,6 +33,31 @@ class Controlador():
     # Implementar .xml multilinea
     def cargar_archivo(self, ruta):
         try:   
+            tree = ET.parse(ruta)
+            root = tree.getroot()
+            output_dir = 'xml_separados/'
+            count = -1
+            
+            for _ in root.findall('senal'):
+                count += 1
+            
+            if count > 0:
+                for senal in root.findall('senal'):
+                    nombre = senal.get('nombre')
+                    nuevas_senales = ET.Element('senales')
+                    nuevas_senales.append(senal)
+                    nuevo_arbol = ET.ElementTree(nuevas_senales)
+
+                    if not os.path.exists(output_dir):
+                        os.makedirs(output_dir)
+                    
+                    nuevos_archivos = os.path.join(output_dir, nombre + '.xml')
+                    nuevo_arbol.write(nuevos_archivos, xml_declaration=True, encoding='UTF-8')
+                print('-'*50)
+                print("Señales separadas en archivos individuales.")
+                print('Verifique en la nueva carpeta creada llamada \"xml_separados/\"')
+                return 
+            
             self.xml = minidom.parse(ruta)
             tree = ET.parse(ruta)
             root = tree.getroot()
@@ -52,7 +77,6 @@ class Controlador():
                 
                 if (t_valor, A_valor) != (t_esperado, A_esperado):
                     # Ordenar los datos según el orden deseado (t, A)
-                    print(f'{t_valor}, {A_valor}')
                     datos_ordenados = sorted(datos, key=lambda dato: (dato.attrib["t"], dato.attrib["A"]))
 
                     # Reemplazar los datos en el XML con los datos ordenados
@@ -63,10 +87,11 @@ class Controlador():
                     # Guardar el archivo XML actualizado
                     tree.write(ruta, xml_declaration=True, encoding='UTF-8')
                     self.xml = minidom.parse(ruta)
+                    print('-'*50)
                     print('El archivo no llevaba el orden correcto, se acaba de ordenar de la manera correcta.')
                     print('Revise nuevamente el archivo .xml.')
                     return
-                # Actualizar los valores esperados para la siguiente iteración
+                # Actualizar los valores esperados para la next iteración
                 A_esperado = str((int(A_esperado) % columna) + 1)
                 if A_esperado == "1":
                     t_esperado = str((int(t_esperado) % fila) + 1)
@@ -105,7 +130,6 @@ class Controlador():
                         dato_str = dato.firstChild.data
                     except AttributeError:
                         dato_str = '0'
-                    print(dato_str)
                     dato_int = int(dato_str)
                     grupo_actual.append(dato_int)
                     if grupo_actual.size() == int(self.columna):
@@ -126,7 +150,7 @@ class Controlador():
                     datos_actuales = datos_originales.head
                     while datos_actuales:
                         suma_datos.append(datos_actuales.dato)
-                        datos_actuales = datos_actuales.siguiente
+                        datos_actuales = datos_actuales.next
                     if self.patron_sumas.head is None:
                         self.patron_sumas.append((patron, suma_datos, [actual.dato[1]]))
                     else:
@@ -136,11 +160,11 @@ class Controlador():
                             if actual_patron_suma.dato[0] == patron:
                                 actual_patron_suma.dato = (patron, actual_patron_suma.dato[1].suma(suma_datos), actual_patron_suma.dato[2] + [actual.dato[1]])
                                 break
-                            elif actual_patron_suma.siguiente is None:
+                            elif actual_patron_suma.next is None:
                                 self.patron_sumas.append((patron, suma_datos, [actual.dato[1]]))
                                 break
-                            actual_patron_suma = actual_patron_suma.siguiente
-                    actual = actual.siguiente
+                            actual_patron_suma = actual_patron_suma.next
+                    actual = actual.next
                 print('Realizando suma de tuplas...')
                 time.sleep(2)
                 print('Calculos de matrices y sumas, han sido completadas.')
@@ -169,9 +193,9 @@ class Controlador():
                 A_count += 1
                 child_dato = SubElement(child_datos_grupo, 'dato', A = str(A_count))
                 child_dato.text = str(actual_suma_datos.dato)
-                actual_suma_datos = actual_suma_datos.siguiente
+                actual_suma_datos = actual_suma_datos.next
 
-            actual_patron_suma = actual_patron_suma.siguiente
+            actual_patron_suma = actual_patron_suma.next
             
         r_string = ET.tostring(top, 'UTF-8')
         reparsed = minidom.parseString(r_string)
@@ -183,7 +207,6 @@ class Controlador():
             archivo.close()
             print('-'*100)
             print('Se guardo el archivo satisfactoriamente en la siguiente ruta: ')
-            print('-'*100)
             print(ruta_completa)
             print('-'*100)
             input('Presione cualquier tecla para continuar...')
@@ -243,10 +266,10 @@ class Controlador():
                         graph_nodos_edges += f'Nodo{count_nodo - int(columna)} -> Nodo{count_nodo}\n'
                         
                     count_nodo += 1
-                    actual_suma_datos = actual_suma_datos.siguiente
+                    actual_suma_datos = actual_suma_datos.next
                 
                 count_grupo += 1
-                actual_patron_suma = actual_patron_suma.siguiente
+                actual_patron_suma = actual_patron_suma.next
         graph_footer = '''
             }
         }
@@ -259,7 +282,7 @@ class Controlador():
         count = 1
         while actual_patron_suma:
             count += 1
-            actual_patron_suma = actual_patron_suma.siguiente
+            actual_patron_suma = actual_patron_suma.next
         return count
 
     def graficar_original(self):

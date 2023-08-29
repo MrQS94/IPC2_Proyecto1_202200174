@@ -11,9 +11,9 @@ class ListaSimple():
             self.head = nuevo_nodo
         else:
             current = self.head
-            while current.siguiente:
-                current = current.siguiente
-            current.siguiente = nuevo_nodo
+            while current.next:
+                current = current.next
+            current.next = nuevo_nodo
             
     def suma(self, otra_lista):
         actual_lista = self.head
@@ -22,8 +22,8 @@ class ListaSimple():
         
         while actual_lista and actual_otra_lista:
             result.append(int(actual_lista.dato) + int(actual_otra_lista.dato))
-            actual_lista = actual_lista.siguiente
-            actual_otra_lista = actual_otra_lista.siguiente
+            actual_lista = actual_lista.next
+            actual_otra_lista = actual_otra_lista.next
             
         return result
     
@@ -32,6 +32,6 @@ class ListaSimple():
         actual = self.head
         while actual:
             count += 1
-            actual = actual.siguiente
+            actual = actual.next
         return count
     
