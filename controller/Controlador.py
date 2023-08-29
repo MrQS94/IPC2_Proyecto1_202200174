@@ -101,7 +101,11 @@ class Controlador():
                 # Se añaden los valores a una lista, y cuenta en la posición en donde se encuentra
                 # También analiza la amplitud, y lo compara para saber que amplitud se deben de crear
                 for dato in datos:
-                    dato_str = dato.firstChild.data
+                    try:
+                        dato_str = dato.firstChild.data
+                    except AttributeError:
+                        dato_str = '0'
+                    print(dato_str)
                     dato_int = int(dato_str)
                     grupo_actual.append(dato_int)
                     if grupo_actual.size() == int(self.columna):
