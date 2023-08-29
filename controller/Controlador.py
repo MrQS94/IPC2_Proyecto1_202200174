@@ -208,8 +208,7 @@ class Controlador():
             print('-'*100)
             print('Se guardo el archivo satisfactoriamente en la siguiente ruta: ')
             print(ruta_completa)
-            print('-'*100)
-            input('Presione cualquier tecla para continuar...')
+            input('Presione cualquier tecla para continuar... ')
         
     def mostrar_datos_estudiante(self):
         print('Andres Alejandro Quezada Cabrera')
