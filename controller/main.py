@@ -22,15 +22,21 @@ def main():
             ruta = input('Ingrese la ruta del archivo: ')
             controlador_handler.cargar_archivo(ruta)
         elif opcion == '2':
-            controlador_handler.procesar_archivo()
+            try:
+                controlador_handler.procesar_archivo()
+            except AttributeError:
+                print('Ingrese primero un .xml en cargar archivo.')
         elif opcion == '3':
             ruta_salida = input('Escribir una ruta especifica: ')
             controlador_handler.escribir_archivo_salida(ruta_salida)
         elif opcion == '4':
             controlador_handler.mostrar_datos_estudiante()
         elif opcion == '5':
-            controlador_handler.graficar_original()
-            controlador_handler.graficar_reducida()
+            try:
+                controlador_handler.graficar_original()
+                controlador_handler.graficar_reducida() 
+            except AttributeError:
+                print('Ingrese primero un .xml en cargar archivo.')
         elif opcion == '6':
             reincio = input('El sistema está apunto de reiniciarse, ¿desea continuar? (Y/N): ')
             if reincio.lower() == 'y':

@@ -343,7 +343,7 @@ class Controlador():
         system(f'cd ./graphviz_{nombre_sin_espacios}.png')
         
     def reinciar(self):
-        self.xml= None
+        self.xml = None
         self.patron_sumas = ListaSimple()
         self.nombre = ''
         self.columna = 0
